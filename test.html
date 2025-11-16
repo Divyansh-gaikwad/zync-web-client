@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test QR Code Generator</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+        #container { text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; }
+        canvas { border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Waiting for Server...</h1>
+        <canvas id="qrCanvas"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+        const serverUrl = prompt("Please enter your ngrok server URL:", "https://");
+        const heading = document.getElementById('container').querySelector('h1');
+        
+        if (serverUrl) {
+            heading.textContent = 'Connecting...';
+            const socket = io(serverUrl);
+
+            socket.on('connect', () => {
+                console.log('Connected to server with ID:', socket.id);
+                heading.textContent = 'Waiting for QR Code...';
+            });
+
+            socket.on('pairing-token', (token) => {
+                console.log('Received token:', token);
+                heading.textContent = 'Scan this QR Code with your Phone';
+                new QRious({
+                    element: document.getElementById('qrCanvas'),
+                    value: token,
+                    size: 250
+                });
+            });
+            
+            socket.on('pairing-successful', () => {
+                heading.textContent = '✅ Device Paired Successfully!';
+            });
+
+            socket.on('connect_error', (err) => {
+                heading.textContent = 'Connection Failed!';
+                console.error('Connection Error:', err.message);
+            });
+        }
+    </script>
+</body>  
+</html>
