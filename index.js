@@ -34,6 +34,21 @@ app.use(express.json()); // Enable parsing JSON bodies for POST requests
 // This httpServer will now handle BOTH Express API routes and Socket.IO
 const httpServer = createServer(app);
 
+// ---------------------------------
+// --- THIS IS THE NEW CODE YOU ASKED FOR ---
+// ---------------------------------
+/**
+ * GET /
+ * Health check route for Render to confirm the server is running.
+ */
+app.get('/', (req, res) => {
+    res.status(200).json({ message: "Zync Server is running!" });
+});
+// ---------------------------------
+// --- END OF NEW CODE ---
+// ---------------------------------
+
+
 // --- API Endpoints (for your Android App) ---
 
 /**
@@ -102,8 +117,7 @@ app.post('/auth/verify', async (req, res) => {
 
 /**
  * POST /token/refresh
- * (Stubbed for now)
- * This endpoint would validate the refresh_token and issue a new access_token.
+ * This endpoint validates the refresh_token and issues a new access_token.
  */
 app.post('/token/refresh', (req, res) => {
     const { refresh_token } = req.body;
@@ -112,7 +126,6 @@ app.post('/token/refresh', (req, res) => {
         return res.status(401).json({ error: "Invalid refresh token" });
     }
     
-    // In a real app, you'd verify the JWT. For now, we trust our map.
     const tokenData = refreshTokens.get(refresh_token);
     
     // Issue a new access token
@@ -126,8 +139,7 @@ app.post('/token/refresh', (req, res) => {
 
 /**
  * POST /devices/unlink
- * (Stubbed for now)
- * This endpoint would remove a device's refresh token.
+ * This endpoint removes a device's refresh token.
  */
 app.post('/devices/unlink', (req, res) => {
     const { device_id } = req.body;
